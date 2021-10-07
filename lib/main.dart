@@ -1,3 +1,4 @@
+import 'package:bus/search.dart';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
@@ -13,15 +14,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -30,7 +29,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   SMITrigger? _go;
   double _top = -40;
-  double _bottom = -200;
+  double _bottom = -240;
 
   static const List<String> _cities = <String>[
     'Casablanca',
@@ -58,16 +57,30 @@ class _MyHomePageState extends State<MyHomePage> {
   void _finishAnimation() {
     setState(() {
       _top = -40;
-      _bottom = -200;
+      _bottom = -240;
     });
   }
 
   void _onRiveInit(Artboard artboard) {
-    final controller =
-        StateMachineController.fromArtboard(artboard, 'StateMachine');
+    var controller = StateMachineController.fromArtboard(
+      artboard,
+      'StateMachine',
+      onStateChange: _onStateChange,
+    );
     artboard.addController(controller!);
     _go = controller.findInput<bool>('go') as SMITrigger;
     _loadingAnimation();
+    setState(() {});
+  }
+
+  void _onStateChange(String stateMachineName, String stateName) {
+    print('State Changed in $stateMachineName to $stateName');
+    if (stateName == "ExitState") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SearchPage()),
+      );
+    }
   }
 
   void _hitGo() {
@@ -143,12 +156,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 DropdownButton<String>(
                   value: _depart,
                   icon: Visibility(
-                      visible: false, child: Icon(Icons.arrow_downward)),
+                    visible: false,
+                    child: Icon(Icons.arrow_downward),
+                  ),
                   iconSize: 24,
                   elevation: 16,
                   style: const TextStyle(color: Colors.white),
                   underline: Container(
-                    height: 2,
+                    height: 1,
                     color: Colors.white,
                   ),
                   dropdownColor: Colors.blue,
@@ -178,12 +193,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 DropdownButton<String>(
                   value: _destination,
                   icon: Visibility(
-                      visible: false, child: Icon(Icons.arrow_downward)),
+                    visible: false,
+                    child: Icon(Icons.arrow_downward),
+                  ),
                   iconSize: 24,
                   elevation: 16,
                   style: const TextStyle(color: Colors.white),
                   underline: Container(
-                    height: 2,
+                    height: 1,
                     color: Colors.white,
                   ),
                   dropdownColor: Colors.blue,
