@@ -26,10 +26,27 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  SMITrigger? _go;
-  double _top = -40;
-  double _bottom = -240;
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  SMITrigger? _go, _start;
+  late AnimationController _controller;
+  late Animation _animation;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 700),
+    );
+    _animation = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _controller.forward();
+    super.initState();
+  }
 
   static const List<String> _cities = <String>[
     'Casablanca',
@@ -47,20 +64,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _loadingAnimation() {
-    setState(() {
-      _top = 40;
-      _bottom = 40;
-    });
-  }
-
-  void _finishAnimation() {
-    setState(() {
-      _top = -40;
-      _bottom = -240;
-    });
-  }
-
   void _onRiveInit(Artboard artboard) {
     var controller = StateMachineController.fromArtboard(
       artboard,
@@ -69,8 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     artboard.addController(controller!);
     _go = controller.findInput<bool>('go') as SMITrigger;
-    _loadingAnimation();
-    setState(() {});
+    _start = controller.findInput<bool>('start') as SMITrigger;
   }
 
   void _onStateChange(String stateMachineName, String stateName) {
@@ -79,12 +81,15 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => SearchPage()),
-      );
+      ).then((value) {
+        _controller.forward();
+        _start?.fire();
+      });
     }
   }
 
   void _hitGo() {
-    _finishAnimation();
+    _controller.reverse();
     _go?.fire();
   }
 
@@ -99,129 +104,147 @@ class _MyHomePageState extends State<MyHomePage> {
             fit: BoxFit.cover,
             onInit: _onRiveInit,
           ),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 600),
-            top: _top,
+          Positioned(
+            top: 60,
             left: 40,
             right: 40,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'Wednesday',
-                      style: TextStyle(color: Colors.white, fontSize: 10),
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Text(
-                      '02/10/2021',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    Text(
-                      '24°C',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Icon(
-                      Icons.cloud_queue,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
-              ],
+            child: AnimatedBuilder(
+              animation: _controller.view,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, _animation.value * -100),
+                  child: child,
+                );
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Wednesday',
+                        style: TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        '02/10/2021',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Text(
+                        '24°C',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(
+                        Icons.cloud_queue,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 600),
-            bottom: _bottom,
+          Positioned(
+            bottom: 40,
             left: 40,
             right: 40,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  'From',
-                  style: TextStyle(color: Colors.white, fontSize: 10),
-                ),
-                DropdownButton<String>(
-                  value: _depart,
-                  icon: Visibility(
-                    visible: false,
-                    child: Icon(Icons.arrow_downward),
+            child: AnimatedBuilder(
+              animation: _controller.view,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, _animation.value * 280),
+                  child: child,
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    'From',
+                    style: TextStyle(color: Colors.white, fontSize: 10),
                   ),
-                  iconSize: 24,
-                  elevation: 16,
-                  style: const TextStyle(color: Colors.white),
-                  underline: Container(
-                    height: 1,
-                    color: Colors.white,
+                  DropdownButton<String>(
+                    value: _depart,
+                    icon: Visibility(
+                      visible: false,
+                      child: Icon(Icons.arrow_downward),
+                    ),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: const TextStyle(color: Colors.white),
+                    underline: Container(
+                      height: 1,
+                      color: Colors.white,
+                    ),
+                    dropdownColor: Colors.blue,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _depart = newValue!;
+                      });
+                    },
+                    items:
+                        _cities.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
-                  dropdownColor: Colors.blue,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _depart = newValue!;
-                    });
-                  },
-                  items: _cities.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                ElevatedButton(
-                  onPressed: () => {_swipCities()},
-                  child: Icon(Icons.swap_vert),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  'To',
-                  style: TextStyle(color: Colors.white, fontSize: 10),
-                ),
-                DropdownButton<String>(
-                  value: _destination,
-                  icon: Visibility(
-                    visible: false,
-                    child: Icon(Icons.arrow_downward),
+                  ElevatedButton(
+                    onPressed: () => {_swipCities()},
+                    child: Icon(Icons.swap_vert),
                   ),
-                  iconSize: 24,
-                  elevation: 16,
-                  style: const TextStyle(color: Colors.white),
-                  underline: Container(
-                    height: 1,
-                    color: Colors.white,
+                  SizedBox(
+                    height: 10,
                   ),
-                  dropdownColor: Colors.blue,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _destination = newValue!;
-                    });
-                  },
-                  items: _cities.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => {_hitGo()},
-                  child: Text("Search"),
-                ),
-              ],
+                  Text(
+                    'To',
+                    style: TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                  DropdownButton<String>(
+                    value: _destination,
+                    icon: Visibility(
+                      visible: false,
+                      child: Icon(Icons.arrow_downward),
+                    ),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: const TextStyle(color: Colors.white),
+                    underline: Container(
+                      height: 1,
+                      color: Colors.white,
+                    ),
+                    dropdownColor: Colors.blue,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _destination = newValue!;
+                      });
+                    },
+                    items:
+                        _cities.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => {_hitGo()},
+                    child: Text("Search"),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
