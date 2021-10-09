@@ -1,3 +1,4 @@
+import 'package:bus/seat.dart';
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatefulWidget {
@@ -49,9 +50,19 @@ class _SearchPageState extends State<SearchPage>
     );
   }
 
+  void openSeatSelection() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SeatPage()),
+    ).then((value) {
+      _controller.forward(from: 0);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40),
         child: Column(
@@ -315,93 +326,103 @@ class _SearchPageState extends State<SearchPage>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      height: 50,
-                      width: 130,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Economy",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 60, 66, 85),
-                                    fontSize: 12,
+                    GestureDetector(
+                      child: Container(
+                        height: 50,
+                        width: 130,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Economy",
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 60, 66, 85),
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  "8 Seat Avaliable",
-                                  style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              "80 DH",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 60, 66, 85),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                                  Text(
+                                    "8 Seat Avaliable",
+                                    style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                              Text(
+                                "80 DH",
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 60, 66, 85),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                      onTap: () {
+                        openSeatSelection();
+                      },
                     ),
-                    Container(
-                      height: 50,
-                      width: 130,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "1st Class",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 60, 66, 85),
-                                    fontSize: 12,
+                    GestureDetector(
+                      child: Container(
+                        height: 50,
+                        width: 130,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "1st Class",
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 60, 66, 85),
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  "5 Seat Avaliable",
-                                  style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              "120 DH",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 60, 66, 85),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                                  Text(
+                                    "5 Seat Avaliable",
+                                    style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                              Text(
+                                "120 DH",
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 60, 66, 85),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                      onTap: () {
+                        openSeatSelection();
+                      },
                     )
                   ],
                 )
