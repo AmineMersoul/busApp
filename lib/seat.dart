@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
 
 class SeatPage extends StatefulWidget {
   SeatPage({Key? key}) : super(key: key);
@@ -8,23 +7,11 @@ class SeatPage extends StatefulWidget {
   _SeatPageState createState() => _SeatPageState();
 }
 
-class _SeatPageState extends State<SeatPage>
-    with SingleTickerProviderStateMixin {
-  late Animation _animation;
-  late AnimationController _controller;
-  SMITrigger? _standardTrigger, _premiumTrigger;
+class _SeatPageState extends State<SeatPage> with TickerProviderStateMixin {
+  late Animation _animation, _animationSeat;
+  late AnimationController _controller, _controllerSeat;
   Color _standard = Colors.white, _premium = Colors.transparent;
   String _price = "80 DH";
-
-  void _onRiveInit(Artboard artboard) {
-    var controller = StateMachineController.fromArtboard(
-      artboard,
-      'State Machine 1',
-    );
-    artboard.addController(controller!);
-    _standardTrigger = controller.findInput<bool>('normal') as SMITrigger;
-    _premiumTrigger = controller.findInput<bool>('premuim') as SMITrigger;
-  }
 
   @override
   void initState() {
@@ -32,10 +19,20 @@ class _SeatPageState extends State<SeatPage>
       vsync: this,
       duration: Duration(milliseconds: 700),
     );
+    _controllerSeat = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 700),
+    );
     _animation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _animationSeat = Tween(begin: -1.0, end: 0.78).animate(
+      CurvedAnimation(
+        parent: _controllerSeat,
+        curve: Interval(0.0, 1.0, curve: Curves.easeInOut),
       ),
     );
     _controller.forward();
@@ -50,7 +47,7 @@ class _SeatPageState extends State<SeatPage>
 
   void _selectPremuim() {
     setState(() {
-      _premiumTrigger?.fire();
+      _controllerSeat.forward();
       _standard = Colors.transparent;
       _premium = Colors.white;
       _price = "120 DH";
@@ -59,7 +56,7 @@ class _SeatPageState extends State<SeatPage>
 
   void _selectStandard() {
     setState(() {
-      _standardTrigger?.fire();
+      _controllerSeat.reverse();
       _standard = Colors.white;
       _premium = Colors.transparent;
       _price = "80 DH";
@@ -264,73 +261,91 @@ class _SeatPageState extends State<SeatPage>
                   Container(
                     width: double.infinity,
                     height: 200,
-                    child: RiveAnimation.asset(
-                      'assets/bus_seat.riv',
-                      animations: [''],
-                      onInit: _onRiveInit,
+                    child: AnimatedBuilder(
+                      animation: _controllerSeat.view,
+                      builder: (context, child) {
+                        return Image.asset(
+                          'assets/bus_seat.png',
+                          fit: BoxFit.fitHeight,
+                          alignment: Alignment(_animationSeat.value, 0),
+                        );
+                      },
                     ),
                   ),
                   SizedBox(
                     height: 20,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  AnimatedBuilder(
+                    animation: _controller.view,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, _animation.value * 280),
+                        child: child,
+                      );
+                    },
+                    child: Column(
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'selection',
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 60, 66, 85),
-                                  fontSize: 12),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              'Seat Z51',
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 60, 66, 85),
-                                  fontSize: 18),
-                            ),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'selection',
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 60, 66, 85),
+                                        fontSize: 12),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    'Seat Z51',
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 60, 66, 85),
+                                        fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'price',
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 60, 66, 85),
+                                        fontSize: 12),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    _price,
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 60, 66, 85),
+                                        fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'price',
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 60, 66, 85),
-                                  fontSize: 12),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              _price,
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 60, 66, 85),
-                                  fontSize: 18),
-                            ),
-                          ],
+                        SizedBox(
+                          height: 20,
                         ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            child: Text("BOOK NOW"),
+                          ),
+                        )
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: Text("BOOK NOW"),
-                    ),
-                  )
                 ],
               ),
             ),
