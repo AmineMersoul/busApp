@@ -1,6 +1,5 @@
 import 'package:bus/search.dart';
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,17 +25,30 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
-  SMITrigger? _go, _start;
-  late AnimationController _controller;
-  late Animation _animation;
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  late AnimationController _controller, _controllerBus, _controllerBusGo;
+  late Animation _animation,
+      _animationBusScale,
+      _animationBusRight,
+      _animationBusTop,
+      _animationBusScaleGo,
+      _animationBusRightGo,
+      _animationBusTopGo;
+  bool visibilityBus = true, visibilityBusGo = false;
 
   @override
   void initState() {
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 700),
+      duration: Duration(milliseconds: 1200),
+    );
+    _controllerBus = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1200),
+    );
+    _controllerBusGo = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1200),
     );
     _animation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
@@ -44,6 +56,43 @@ class _MyHomePageState extends State<MyHomePage>
         curve: Interval(0.0, 1.0, curve: Curves.easeIn),
       ),
     );
+    _animationBusScale = Tween(begin: 100.0, end: 200.0).animate(
+      CurvedAnimation(
+        parent: _controllerBus,
+        curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _animationBusRight = Tween(begin: -200.0, end: 10.0).animate(
+      CurvedAnimation(
+        parent: _controllerBus,
+        curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _animationBusTop = Tween(begin: 245.0, end: 210.0).animate(
+      CurvedAnimation(
+        parent: _controllerBus,
+        curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _animationBusScaleGo = Tween(begin: 200.0, end: 600.0).animate(
+      CurvedAnimation(
+        parent: _controllerBusGo,
+        curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _animationBusRightGo = Tween(begin: 10.0, end: 600.0).animate(
+      CurvedAnimation(
+        parent: _controllerBusGo,
+        curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _animationBusTopGo = Tween(begin: 210.0, end: 40.0).animate(
+      CurvedAnimation(
+        parent: _controllerBusGo,
+        curve: Interval(0.0, 1.0, curve: Curves.easeIn),
+      ),
+    );
+    _controllerBus.forward();
     _controller.forward();
     super.initState();
   }
@@ -64,33 +113,22 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
-  void _onRiveInit(Artboard artboard) {
-    var controller = StateMachineController.fromArtboard(
-      artboard,
-      'StateMachine',
-      onStateChange: _onStateChange,
-    );
-    artboard.addController(controller!);
-    _go = controller.findInput<bool>('go') as SMITrigger;
-    _start = controller.findInput<bool>('start') as SMITrigger;
-  }
-
-  void _onStateChange(String stateMachineName, String stateName) {
-    print('State Changed in $stateMachineName to $stateName');
-    if (stateName == "ExitState") {
+  void _hitGo() {
+    setState(() {
+      visibilityBus = false;
+      visibilityBusGo = true;
+    });
+    _controllerBusGo.forward();
+    _controller.reverse().then((value) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => SearchPage()),
       ).then((value) {
-        _controller.forward();
-        _start?.fire();
+        _controller.forward(from: 0);
+        _controllerBus.forward(from: 0);
+        _controllerBusGo.reset();
       });
-    }
-  }
-
-  void _hitGo() {
-    _controller.reverse();
-    _go?.fire();
+    });
   }
 
   @override
@@ -98,11 +136,50 @@ class _MyHomePageState extends State<MyHomePage>
     return Scaffold(
       body: Stack(
         children: [
-          RiveAnimation.asset(
-            'assets/bus.riv',
-            animations: ['coming'],
-            fit: BoxFit.cover,
-            onInit: _onRiveInit,
+          Container(
+            width: double.infinity,
+            child: Image.asset(
+              'assets/bus_background.png',
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+          AnimatedBuilder(
+            animation: _controllerBus.view,
+            builder: (context, child) {
+              return Visibility(
+                visible: visibilityBus,
+                child: Positioned(
+                  top: _animationBusTop.value,
+                  right: _animationBusRight.value,
+                  child: Container(
+                    height: _animationBusScale.value,
+                    width: _animationBusScale.value,
+                    child: Image.asset(
+                      'assets/bus.png',
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          AnimatedBuilder(
+            animation: _controllerBusGo.view,
+            builder: (context, child) {
+              return Visibility(
+                visible: visibilityBusGo,
+                child: Positioned(
+                  top: _animationBusTopGo.value,
+                  right: _animationBusRightGo.value,
+                  child: Container(
+                    height: _animationBusScaleGo.value,
+                    width: _animationBusScaleGo.value,
+                    child: Image.asset(
+                      'assets/bus.png',
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           Positioned(
             top: 60,
