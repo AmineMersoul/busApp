@@ -107,7 +107,7 @@ class _SeatPageState extends State<SeatPage> with TickerProviderStateMixin {
                   ),
                 ),
                 Spacer(
-                  flex: 2,
+                  flex: 1,
                 ),
               ],
             ),
@@ -258,6 +258,7 @@ class _SeatPageState extends State<SeatPage> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  SizedBox(height: 10),
                   Container(
                     width: double.infinity,
                     height: 200,
